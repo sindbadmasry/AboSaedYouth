@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4338CA">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>تقرير المباراة الرسمي</title>
+    
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogItiq2YLYsdmK2LEg2KfZhNmF2KjYp9ix2KfYqSIsCiAgInNob3J0X25hbWUiOiAiTWF0Y2ggUmVwb3J0IiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjFmNWY5IiwKICAidGhlbWVfY29sb3ciOiAiIzQzMzhDQSIsCiAgImljb25zIjogW3sic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzUzMjgvNTMyODA5OC5wbmciLCAic2l6ZXMiOiAiNTEyeDUxMiIsICJ0eXBlIjogImltYWdlL3BuZyJ9XQp9">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                        num: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        print: {
+                            bg: '#FFFFFF',
+                            text: '#111827',
+                            accent: '#4338CA', 
+                            accentLight: '#EEF2FF',
+                            border: '#E5E7EB',
+                            card: '#F8FAFC'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            background-color: #F1F5F9; 
+            font-family: 'Tajawal', sans-serif;
+            color: #111827;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .editable {
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            border-radius: 0.375rem; 
+            width: 100%;
+        }
+        .editable:hover { background-color: #F1F5F9; border-color: #CBD5E1; }
+        .editable:focus {
+            background-color: #FFFFFF;
+            border-color: #4338CA;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15);
+        }
+        .font-num { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; }
+
+        /* إعدادات الطباعة السحرية المحسنة لاستيعاب 18 حدث */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm; /* تقليل الهوامش لأقصى درجة */
+            }
+            body {
+                background-color: #FFFFFF !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print { display: none !important; }
+            
+            .print-paper {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background-color: #FFFFFF !important;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 277mm !important; /* طول الورقة الفعلي بعد الهوامش */
+            }
+
+            .editable {
+                border: none !important;
+                background-color: transparent !important;
+                padding: 0 !important;
+                appearance: none !important; 
+            }
+            select.editable { display: none !important; }
+            .print-team-label { 
+                display: block !important; 
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            /* ضغط الأحداث في الطباعة لتتحمل 18 حدث */
+            .event-item {
+                display: grid !important;
+                grid-template-columns: 45px 30px 1fr 100px !important;
+                padding: 4px !important; 
+                margin-bottom: 2px !important;
+                align-items: center !important;
+                border-width: 1px !important;
+                font-size: 0.75rem !important; /* خط أصغر text-xs */
+                gap: 4px !important;
+            }
+            .event-item input { font-size: 0.75rem !important; }
+            .event-icon { font-size: 0.875rem !important; }
+            
+            /* ضغط العناصر العلوية لترك مساحة للأحداث */
+            .print-header { padding-bottom: 8px !important; margin-bottom: 12px !important; }
+            .print-score-card { padding: 10px !important; margin-bottom: 12px !important; gap: 10px !important; }
+            .print-logo { width: 50px !important; height: 50px !important; border: none !important; }
+            .print-score-text { font-size: 2.5rem !important; }
+            .print-team-name { font-size: 1.25rem !important; }
+        }
+
+        .print-team-label { display: none; }
+    </style>
+</head>
+<body x-data="matchApp()">
+
+    <div class="w-full max-w-[210mm] mx-auto mt-4 mb-4 px-4 no-print flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-print-border">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+            <i class="fa-solid fa-file-contract text-print-accent text-2xl"></i>
+            <h1 class="text-xl font-bold text-gray-800">تقرير المباراة</h1>
+        </div>
+        <div class="flex flex-wrap justify-center gap-2 w-full sm:w-auto">
+            <button @click="installPWA()" id="installBtn" style="display:none;" class="px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 text-sm font-semibold flex items-center gap-2 border border-green-200">
+                <i class="fa-solid fa-download"></i> تثبيت التطبيق
+            </button>
+            <button @click="resetData()" class="px-4 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold flex items-center gap-2 border border-red-200">
+                <i class="fa-solid fa-trash-can"></i> مسح
+            </button>
+            <button onclick="window.print()" class="px-6 py-2 rounded-lg bg-print-accent hover:bg-indigo-800 text-white shadow-md font-bold flex items-center gap-2">
+                <i class="fa-solid fa-print"></i> طباعة (18 حدث)
+            </button>
+        </div>
+    </div>
+
+    <div class="print-paper w-full max-w-[210mm] min-h-[297mm] mx-auto bg-white shadow-2xl md:rounded-lg overflow-hidden mb-12 p-4 md:p-[15mm] flex flex-col">
+        
+        <div class="print-header flex flex-col md:flex-row justify-between items-start border-b-2 border-print-accent pb-4 mb-6 gap-4">
+            <div class="flex flex-col gap-1 w-full md:flex-1">
+                <input type="text" x-model="match.league" class="editable font-extrabold text-xl md:text-2xl text-print-text px-2 py-0.5 -ml-2" placeholder="اسم البطولة">
+                <div class="flex flex-wrap md:flex-nowrap items-center gap-4 text-gray-600 text-xs md:text-sm">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fa-regular fa-calendar-days text-print-accent"></i>
+                        <input type="text" x-model="match.date" class="editable font-num px-1 py-0.5 w-24" placeholder="التاريخ">
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-dot text-print-accent"></i>
+                        <input type="text" x-model="match.stadium" class="editable px-1 py-0.5 min-w-[120px]" placeholder="الملعب">
+                    </div>
+                </div>
+            </div>
+            <div class="text-right md:text-left w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end">
+                <div class="font-bold text-base md:text-lg text-print-text">تقرير مباراة</div>
+                <div class="text-xs md:text-sm text-gray-500 font-num flex items-center gap-1">REF: #<input type="text" x-model="match.refId" class="editable w-12 text-left" placeholder="000"></div>
+            </div>
+        </div>
+
+        <div class="print-score-card flex flex-col md:grid md:grid-cols-[1fr,auto,1fr] items-center gap-4 py-4 mb-6 bg-print-card rounded-xl border border-print-border px-4">
+            <div class="flex flex-col items-center gap-2 text-center w-full">
+                <label class="print-logo w-16 h-16 md:w-20 md:h-20 rounded-full bg-white border-2 border-dashed border-gray-300 hover:border-print-accent flex items-center justify-center cursor-pointer overflow-hidden relative group">
+                    <input type="file" accept="image/*" class="hidden no-print" @change="uploadLogo($event, 'A')">
+                    <template x-if="match.logoA"><img :src="match.logoA" class="w-full h-full object-cover"></template>
+                    <template x-if="!match.logoA"><i class="fa-solid fa-cloud-arrow-up text-xl text-gray-400 group-hover:text-print-accent no-print"></i></template>
+                    <i class="fa-solid fa-shield-halved text-3xl text-gray-200 print:block" x-show="!match.logoA" :class="{'hidden': true}"></i>
+                </label>
+                <input type="text" x-model="match.teamA" class="print-team-name editable text-center text-xl md:text-2xl font-extrabold px-1 py-0.5" placeholder="المضيف">
+            </div>
+
+            <div class="flex items-center justify-center gap-2 px-4 py-2 w-full md:w-auto">
+                <input type="text" x-model="match.scoreA" class="print-score-text editable w-12 text-center text-4xl md:text-6xl font-num font-extrabold text-print-accent p-0" placeholder="0">
+                <div class="print-score-text text-3xl md:text-4xl font-extrabold text-gray-300">-</div>
+                <input type="text" x-model="match.scoreB" class="print-score-text editable w-12 text-center text-4xl md:text-6xl font-num font-extrabold text-print-text p-0" placeholder="0">
+            </div>
+
+            <div class="flex flex-col items-center gap-2 text-center w-full">
+                <label class="print-logo w-16 h-16 md:w-20 md:h-20 rounded-full bg-white border-2 border-dashed border-gray-300 hover:border-print-accent flex items-center justify-center cursor-pointer overflow-hidden relative group">
+                    <input type="file" accept="image/*" class="hidden no-print" @change="uploadLogo($event, 'B')">
+                    <template x-if="match.logoB"><img :src="match.logoB" class="w-full h-full object-cover"></template>
+                    <template x-if="!match.logoB"><i class="fa-solid fa-cloud-arrow-up text-xl text-gray-400 group-hover:text-print-accent no-print"></i></template>
+                    <i class="fa-solid fa-shield text-3xl text-gray-200 print:block" x-show="!match.logoB" :class="{'hidden': true}"></i>
+                </label>
+                <input type="text" x-model="match.teamB" class="print-team-name editable text-center text-xl md:text-2xl font-extrabold px-1 py-0.5" placeholder="الضيف">
+            </div>
+        </div>
+
+        <div class="mb-4 flex-1">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-print-border">
+                <h3 class="text-sm md:text-base font-bold flex items-center gap-2 text-print-text">
+                    <i class="fa-solid fa-list-ol text-print-accent"></i> سجل الأحداث <span class="text-xs text-gray-400 font-num">(<span x-text="match.events.length"></span>/18)</span>
+                </h3>
+                <button @click="addEvent()" :disabled="match.events.length >= 18" class="no-print bg-gray-800 disabled:bg-gray-400 hover:bg-gray-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                    <i class="fa-solid fa-plus"></i> إضافة حدث
+                </button>
+            </div>
+
+            <div class="space-y-1.5 md:space-y-2">
+                <template x-for="(event, index) in match.events" :key="index">
+                    <div class="event-item flex flex-wrap md:grid md:grid-cols-[50px,30px,1fr,auto,auto] items-center gap-2 p-1.5 md:p-2 rounded-md bg-white border border-print-border hover:border-print-accent transition-all group">
+                        
+                        <div class="w-12 shrink-0 flex items-center justify-center gap-0.5 font-num font-bold text-sm text-print-accent bg-print-accentLight px-1 py-0.5 rounded border border-indigo-100">
+                            <input type="text" x-model="event.time" class="editable w-full text-center p-0 bg-transparent font-bold" placeholder="00">
+                            <span class="text-[10px] text-indigo-400">'</span>
+                        </div>
+
+                        <div class="w-6 shrink-0 flex justify-center event-icon text-sm">
+                            <template x-if="event.type === 'goal'"><i class="fa-solid fa-futbol text-gray-800"></i></template>
+                            <template x-if="event.type === 'yellow'"><i class="fa-solid fa-square text-yellow-400 border border-yellow-500 rounded-sm"></i></template>
+                            <template x-if="event.type === 'red'"><i class="fa-solid fa-square text-red-600 border border-red-700 rounded-sm"></i></template>
+                            <template x-if="event.type === 'sub'"><i class="fa-solid fa-right-left text-print-accent"></i></template>
+                        </div>
+
+                        <div class="flex flex-col flex-1 min-w-[120px]">
+                            <input type="text" x-model="event.player1" class="editable text-sm font-semibold text-print-text px-1 py-0" placeholder="اسم اللاعب...">
+                            <template x-if="event.type === 'sub'">
+                                <div class="flex items-center gap-1 text-[10px] text-gray-500">
+                                    <i class="fa-solid fa-arrow-turn-down text-red-500 flip-x"></i>
+                                    <input type="text" x-model="event.player2" class="editable flex-1 text-gray-500 px-1 py-0" placeholder="اللاعب الخارج...">
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="flex gap-1 no-print w-full md:w-auto mt-1 md:mt-0">
+                            <select x-model="event.team" class="editable flex-1 bg-gray-50 border border-gray-300 rounded px-1 py-1 text-xs font-medium">
+                                <option value="A">المضيف</option>
+                                <option value="B">الضيف</option>
+                            </select>
+                            <select x-model="event.type" class="editable flex-1 bg-gray-50 border border-gray-300 rounded px-1 py-1 text-xs font-medium">
+                                <option value="goal">هدف</option>
+                                <option value="yellow">إنذار</option>
+                                <option value="red">طرد</option>
+                                <option value="sub">تبديل</option>
+                            </select>
+                        </div>
+
+                        <div class="print-team-label text-xs font-bold text-gray-600 w-20 text-left">
+                            <span x-text="event.team === 'A' ? match.teamA : match.teamB"></span>
+                        </div>
+
+                        <button @click="removeEvent(index)" class="no-print w-6 h-6 flex items-center justify-center rounded-full text-red-400 bg-red-50 hover:bg-red-100 md:opacity-0 group-hover:opacity-100 transition-all absolute left-2 md:relative md:left-0">
+                            <i class="fa-solid fa-times text-xs"></i>
+                        </button>
+                    </div>
+                </template>
+                <template x-if="match.events.length === 0">
+                    <div class="text-center py-6 text-gray-400 text-sm border border-dashed border-print-border rounded-md bg-print-card">لا توجد أحداث</div>
+                </template>
+            </div>
+        </div>
+
+        <div class="mt-auto pt-6 border-t border-print-border w-full print:pt-4">
+            <div class="grid grid-cols-2 gap-4 text-center text-xs text-gray-600">
+                <div class="flex flex-col items-center gap-1">
+                    <div class="w-full max-w-[120px] h-8 border-b border-gray-400 border-dashed"></div>
+                    <div class="font-bold mt-1">توقيع حكم الساحة</div>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <div class="w-full max-w-[120px] h-8 border-b border-gray-400 border-dashed"></div>
+                    <div class="font-bold mt-1">توقيع مراقب المباراة</div>
+                </div>
+            </div>
+            <div class="text-center text-[10px] text-gray-400 mt-4 font-num">تم إنشاء التقرير إلكترونياً • <span x-text="new Date().toLocaleDateString('ar-EG')"></span></div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            const defaultData = {
+                league: 'نهائي كأس السوبر', date: '10 أكتوبر 2025', stadium: 'استاد القاهرة الدولي', refId: 'R-992',
+                teamA: 'الفريق الأول', teamB: 'الفريق الثاني', logoA: null, logoB: null, scoreA: '2', scoreB: '1',
+                events: [
+                    { time: '15', type: 'yellow', player1: 'أحمد سعيد', player2: '', team: 'A' },
+                    { time: '30', type: 'goal', player1: 'محمد صلاح', player2: '', team: 'A' },
+                    { time: '45', type: 'sub', player1: 'عمر كمال', player2: 'حسين الشحات', team: 'B' },
+                    { time: '60', type: 'red', player1: 'محمود علاء', player2: '', team: 'B' }
+                ]
+            };
+
+            Alpine.data('matchApp', () => ({
+                match: defaultData,
+                init() {
+                    const saved = localStorage.getItem('matchReport_PWA');
+                    if (saved) { try { this.match = JSON.parse(saved); } catch (e) { this.match = defaultData; } }
+                    this.$watch('match', (newValue) => { localStorage.setItem('matchReport_PWA', JSON.stringify(newValue)); }, { deep: true });
+                },
+                uploadLogo(event, team) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        if (team === 'A') this.match.logoA = e.target.result;
+                        if (team === 'B') this.match.logoB = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                },
+                addEvent() {
+                    if(this.match.events.length < 18) {
+                        this.match.events.push({ time: '', type: 'goal', player1: '', player2: '', team: 'A' });
+                    } else {
+                        alert("الحد الأقصى هو 18 حدث لضمان ملاءمتها في ورقة واحدة.");
+                    }
+                },
+                removeEvent(index) {
+                    if(confirm('حذف الحدث؟')) this.match.events.splice(index, 1);
+                },
+                resetData() {
+                    if(confirm('مسح كافة البيانات؟')) {
+                        this.match = { ...defaultData, events: [], logoA: null, logoB: null }; 
+                        localStorage.removeItem('matchReport_PWA');
+                    }
+                }
+            }))
+        });
+
+        // ----------------------------------------
+        // إعدادات PWA المدمجة (Service Worker و Install Prompt)
+        // ----------------------------------------
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'flex';
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                    document.getElementById('installBtn').style.display = 'none';
+                });
+            }
+        }
+
+        // إنشاء Service Worker وهمي ليتعرف عليه المتصفح كـ PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+                    self.addEventListener('fetch', (e) => { });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                
+                navigator.serviceWorker.register(swUrl)
+                    .then(reg => console.log('PWA Service Worker مفعّل بنجاح'))
+                    .catch(err => console.log('ملاحظة: لتعمل خصائص PWA كاملة بشكل أوفلاين، يُفضل رفع الملف على استضافة فعلية.', err));
+            });
+        }
+    </script>
+</body>
+</html>
