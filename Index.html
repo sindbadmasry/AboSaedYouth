@@ -143,7 +143,7 @@
                 <i class="fa-solid fa-trash-can"></i> مسح
             </button>
             <button onclick="window.print()" class="px-6 py-2 rounded-lg bg-print-accent hover:bg-indigo-800 text-white shadow-md font-bold flex items-center gap-2">
-                <i class="fa-solid fa-print"></i> طباعة (18 حدث)
+                <i class="fa-solid fa-print"></i> طباعة
             </button>
         </div>
     </div>
@@ -203,7 +203,7 @@
                 <h3 class="text-sm md:text-base font-bold flex items-center gap-2 text-print-text">
                     <i class="fa-solid fa-list-ol text-print-accent"></i> سجل الأحداث <span class="text-xs text-gray-400 font-num">(<span x-text="match.events.length"></span>/18)</span>
                 </h3>
-                <button @click="addEvent()" :disabled="match.events.length >= 18" class="no-print bg-gray-800 disabled:bg-gray-400 hover:bg-gray-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                <button @click="addEvent()" :disabled="match.events.length >= 100" class="no-print bg-gray-800 disabled:bg-gray-400 hover:bg-gray-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors">
                     <i class="fa-solid fa-plus"></i> إضافة حدث
                 </button>
             </div>
@@ -281,7 +281,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             const defaultData = {
-                league: 'نهائي كأس السوبر', date: '10 أكتوبر 2025', stadium: 'استاد القاهرة الدولي', refId: 'R-992',
+                league: 'دور المجموعات', date: '10 أكتوبر 2025', stadium: 'مركز شباب عرب ابو ساعد', refId: 'R-992',
                 teamA: 'الفريق الأول', teamB: 'الفريق الثاني', logoA: null, logoB: null, scoreA: '2', scoreB: '1',
                 events: [
                     { time: '15', type: 'yellow', player1: 'أحمد سعيد', player2: '', team: 'A' },
@@ -312,7 +312,7 @@
                     if(this.match.events.length < 18) {
                         this.match.events.push({ time: '', type: 'goal', player1: '', player2: '', team: 'A' });
                     } else {
-                        alert("الحد الأقصى هو 18 حدث لضمان ملاءمتها في ورقة واحدة.");
+                        alert("الحد الأقصى هو ١٠٠ حدث لضمان ملاءمتها في ورقة واحدة.");
                     }
                 },
                 removeEvent(index) {
