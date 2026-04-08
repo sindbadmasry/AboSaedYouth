@@ -2,7 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Sports Tournament Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0B1D3A">
+    <title>نظام إدارة البطولات</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -10,7 +13,6 @@
     
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Tajawal', 'sans-serif'], num: ['Inter', 'sans-serif'] },
@@ -26,233 +28,399 @@
     </script>
 
     <style>
-        body { background-color: #050b14; color: #ffffff; background-image: radial-gradient(circle at top right, rgba(29, 161, 242, 0.15), transparent 40%), radial-gradient(circle at bottom left, rgba(0, 255, 156, 0.1), transparent 40%); background-attachment: fixed; }
-        
-        /* Glassmorphism Classes */
-        .glass-card {
-            background: rgba(11, 29, 58, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        body { 
+            background-color: #050b14; 
+            color: #ffffff; 
+            background-image: radial-gradient(circle at top right, rgba(29, 161, 242, 0.15), transparent 40%), 
+                              radial-gradient(circle at bottom left, rgba(0, 255, 156, 0.1), transparent 40%); 
+            background-attachment: fixed; 
+            -webkit-tap-highlight-color: transparent;
         }
         
-        .glass-header {
-            background: rgba(5, 11, 20, 0.8);
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(11, 29, 58, 0.65);
             backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .glass-card:active { transform: scale(0.98); }
+
+        /* Custom Input */
+        .custom-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .custom-input:focus {
+            border-color: #1DA1F2;
+            box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
+            background: rgba(0, 0, 0, 0.4);
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #1DA1F2; border-radius: 10px; }
+        /* Hide scrollbar for clean mobile look */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body x-data="appData()" x-init="initApp()" class="antialiased overflow-hidden flex h-screen text-gray-200">
+<body x-data="tourneyApp()" x-init="init()" class="antialiased overflow-hidden flex h-screen">
 
-    <aside class="w-64 glass-card m-4 hidden md:flex flex-col relative z-20 overflow-hidden shrink-0">
-        <div class="p-6 border-b border-white/10 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-neon to-electric flex items-center justify-center shadow-lg shadow-neon/20">
-                <i class="fa-solid fa-trophy text-navy text-xl"></i>
+    <div x-show="isMobileMenuOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+         @click="isMobileMenuOpen = false"></div>
+
+    <aside :class="isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'"
+           class="fixed lg:static inset-y-0 right-0 z-50 w-72 glass-panel flex flex-col transition-transform duration-300 ease-in-out border-l border-white/10 lg:m-4 lg:rounded-2xl lg:border lg:h-[calc(100vh-2rem)] shrink-0">
+        
+        <div class="p-6 flex items-center justify-between border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-neon to-electric flex items-center justify-center shadow-[0_0_15px_rgba(0,255,156,0.3)]">
+                    <i class="fa-solid fa-trophy text-navy text-xl"></i>
+                </div>
+                <h1 class="font-black text-2xl tracking-wide text-white">برو<span class="text-neon">ليج</span></h1>
             </div>
-            <h1 class="font-black text-xl tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">برو ليج</h1>
+            <button @click="isMobileMenuOpen = false" class="lg:hidden text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <template x-for="item in menu" :key="item.id">
-                <button @click="currentPage = item.id" 
-                        :class="{'bg-electric/20 text-electric border-r-4 border-neon shadow-[inset_0_0_20px_rgba(29,161,242,0.1)]': currentPage === item.id, 'text-gray-400 hover:bg-white/5 hover:text-white border-r-4 border-transparent': currentPage !== item.id}"
-                        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 font-semibold text-right">
-                    <i :class="item.icon" class="w-5 text-center"></i>
+                <button @click="changePage(item.id)" 
+                        :class="currentPage === item.id ? 'bg-electric/10 text-electric border-r-4 border-electric' : 'text-gray-400 hover:bg-white/5 hover:text-white border-r-4 border-transparent'"
+                        class="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all duration-200 font-bold text-right text-sm md:text-base">
+                    <i :class="item.icon" class="w-6 text-center text-lg"></i>
                     <span x-text="item.name"></span>
                 </button>
             </template>
         </nav>
 
-        <div class="p-4 border-t border-white/10">
-            <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-                <div class="w-10 h-10 rounded-full bg-navy border border-electric/30 flex items-center justify-center text-electric">
+        <div class="p-4 border-t border-white/10 mt-auto">
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                <div class="w-10 h-10 rounded-full bg-navy border-2 border-electric flex items-center justify-center text-electric">
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
-                <div>
-                    <div class="text-sm font-bold text-white">إدارة النظام</div>
-                    <div class="text-xs text-neon" x-show="isAdmin">صلاحيات كاملة</div>
+                <div class="flex-1 overflow-hidden">
+                    <div class="text-sm font-bold text-white truncate">إدارة النظام</div>
+                    <div class="text-[10px] text-neon flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-neon animate-pulse"></span> متصل</div>
                 </div>
             </div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative z-10 w-full">
         
-        <header class="glass-header h-20 px-8 flex items-center justify-between shrink-0">
+        <header class="glass-panel h-16 md:h-20 px-4 md:px-8 flex items-center justify-between shrink-0 border-b border-white/10 lg:m-4 lg:mb-0 lg:rounded-2xl lg:border">
             <div class="flex items-center gap-4">
-                <button class="md:hidden text-gray-400 hover:text-white"><i class="fa-solid fa-bars text-xl"></i></button>
-                <h2 class="text-2xl font-bold text-white tracking-wide" x-text="getPageTitle()"></h2>
+                <button @click="isMobileMenuOpen = true" class="lg:hidden w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-white hover:bg-white/10 active:scale-95 transition-all">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
+                <h2 class="text-lg md:text-2xl font-black text-white tracking-wide" x-text="getPageTitle()"></h2>
             </div>
-            <div class="flex items-center gap-4">
-                <button class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-300 relative transition-colors">
+            <div class="flex items-center gap-3">
+                <button class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-300 relative">
                     <i class="fa-regular fa-bell"></i>
-                    <span class="absolute top-2 right-2 w-2 h-2 bg-neon rounded-full shadow-[0_0_8px_#00FF9C]"></span>
+                    <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-neon rounded-full shadow-[0_0_8px_#00FF9C]"></span>
                 </button>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:px-8 pb-24 lg:pb-8 relative">
             
-            <div x-show="isLoading" class="flex flex-col items-center justify-center h-64 gap-4">
-                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-neon"></i>
-                <p class="text-gray-400 font-medium animate-pulse">جاري تحميل البيانات...</p>
+            <div x-show="isLoading" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050b14]/80 backdrop-blur-sm">
+                <i class="fa-solid fa-circle-notch fa-spin text-5xl text-electric drop-shadow-[0_0_15px_#1DA1F2]"></i>
+                <p class="mt-4 text-white font-bold tracking-widest animate-pulse">جاري التحميل...</p>
             </div>
 
-            <div x-show="currentPage === 'dashboard' && !isLoading" x-transition.opacity class="space-y-6">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="glass-card p-6 relative overflow-hidden group">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-neon/10 rounded-full blur-2xl group-hover:bg-neon/20 transition-all"></div>
-                        <div class="flex justify-between items-start relative z-10">
-                            <div>
-                                <p class="text-gray-400 text-sm font-semibold mb-1">إجمالي البطولات</p>
-                                <h3 class="text-4xl font-black font-num text-white" x-text="stats.tournamentsCount">0</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-xl bg-neon/10 text-neon flex items-center justify-center text-xl shadow-[0_0_15px_rgba(0,255,156,0.15)]">
+            <div x-show="currentPage === 'dashboard'" x-transition.opacity class="space-y-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+                    <div class="glass-card p-4 md:p-6 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-neon/10 rounded-full blur-2xl"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-neon/10 text-neon flex items-center justify-center text-sm md:text-xl">
                                 <i class="fa-solid fa-trophy"></i>
                             </div>
                         </div>
+                        <div>
+                            <h3 class="text-2xl md:text-4xl font-black font-num text-white" x-text="stats.tournamentsCount">0</h3>
+                            <p class="text-gray-400 text-xs md:text-sm font-bold mt-1">البطولات</p>
+                        </div>
                     </div>
-
-                    <div class="glass-card p-6 relative overflow-hidden group">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-electric/10 rounded-full blur-2xl group-hover:bg-electric/20 transition-all"></div>
-                        <div class="flex justify-between items-start relative z-10">
-                            <div>
-                                <p class="text-gray-400 text-sm font-semibold mb-1">الفرق المسجلة</p>
-                                <h3 class="text-4xl font-black font-num text-white" x-text="stats.teamsCount">0</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-xl bg-electric/10 text-electric flex items-center justify-center text-xl shadow-[0_0_15px_rgba(29,161,242,0.15)]">
+                    <div class="glass-card p-4 md:p-6 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-electric/10 rounded-full blur-2xl"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-electric/10 text-electric flex items-center justify-center text-sm md:text-xl">
                                 <i class="fa-solid fa-shield-halved"></i>
                             </div>
                         </div>
+                        <div>
+                            <h3 class="text-2xl md:text-4xl font-black font-num text-white" x-text="stats.teamsCount">0</h3>
+                            <p class="text-gray-400 text-xs md:text-sm font-bold mt-1">الفرق</p>
+                        </div>
                     </div>
-
-                    <div class="glass-card p-6 relative overflow-hidden group">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all"></div>
-                        <div class="flex justify-between items-start relative z-10">
-                            <div>
-                                <p class="text-gray-400 text-sm font-semibold mb-1">عدد اللاعبين</p>
-                                <h3 class="text-4xl font-black font-num text-white" x-text="stats.playersCount">0</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+                    <div class="glass-card p-4 md:p-6 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm md:text-xl">
                                 <i class="fa-solid fa-users"></i>
                             </div>
                         </div>
+                        <div>
+                            <h3 class="text-2xl md:text-4xl font-black font-num text-white" x-text="stats.playersCount">0</h3>
+                            <p class="text-gray-400 text-xs md:text-sm font-bold mt-1">اللاعبين</p>
+                        </div>
                     </div>
-
-                    <div class="glass-card p-6 relative overflow-hidden group">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all"></div>
-                        <div class="flex justify-between items-start relative z-10">
-                            <div>
-                                <p class="text-gray-400 text-sm font-semibold mb-1">مباريات قادمة</p>
-                                <h3 class="text-4xl font-black font-num text-white" x-text="stats.upcomingMatches">0</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(239,68,68,0.15)]">
+                    <div class="glass-card p-4 md:p-6 relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-red-500/10 rounded-full blur-2xl"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center text-sm md:text-xl">
                                 <i class="fa-solid fa-stopwatch"></i>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="glass-card overflow-hidden">
-                    <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-futbol text-electric"></i> أحدث المباريات
-                        </h3>
-                        <button class="text-sm text-electric hover:text-neon transition-colors">عرض الكل</button>
-                    </div>
-                    <div class="p-0">
-                        <template x-if="latestMatches.length === 0">
-                            <div class="p-8 text-center text-gray-500 text-sm">لا توجد مباريات مسجلة حالياً</div>
-                        </template>
-                        <div class="divide-y divide-white/5">
-                            <template x-for="match in latestMatches" :key="match.ID">
-                                <div class="p-4 hover:bg-white/5 transition-colors flex items-center justify-between">
-                                    <div class="flex items-center gap-4 w-1/3 justify-end">
-                                        <span class="font-bold text-white" x-text="match.TeamA"></span>
-                                        <div class="w-8 h-8 bg-navy border border-white/10 rounded-full flex items-center justify-center"><i class="fa-solid fa-shield text-xs text-gray-500"></i></div>
-                                    </div>
-                                    <div class="px-6 flex flex-col items-center justify-center">
-                                        <div class="bg-navy/80 border border-electric/30 px-4 py-1 rounded-lg font-num font-black text-xl tracking-widest text-white shadow-[0_0_10px_rgba(29,161,242,0.2)]">
-                                            <span x-text="match.ScoreA"></span> - <span x-text="match.ScoreB"></span>
-                                        </div>
-                                        <span class="text-[10px] text-neon mt-1" x-show="match.Status === 'Live'">LIVE</span>
-                                        <span class="text-[10px] text-gray-500 mt-1 font-num" x-show="match.Status !== 'Live'" x-text="match.Date"></span>
-                                    </div>
-                                    <div class="flex items-center gap-4 w-1/3 justify-start">
-                                        <div class="w-8 h-8 bg-navy border border-white/10 rounded-full flex items-center justify-center"><i class="fa-solid fa-shield text-xs text-gray-500"></i></div>
-                                        <span class="font-bold text-white" x-text="match.TeamB"></span>
-                                    </div>
-                                </div>
-                            </template>
+                        <div>
+                            <h3 class="text-2xl md:text-4xl font-black font-num text-white" x-text="stats.upcomingMatches">0</h3>
+                            <p class="text-gray-400 text-xs md:text-sm font-bold mt-1">مباريات قادمة</p>
                         </div>
                     </div>
                 </div>
 
+                <div class="glass-panel rounded-2xl overflow-hidden mt-6">
+                    <div class="p-4 md:p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+                        <h3 class="font-bold text-white text-sm md:text-base"><i class="fa-solid fa-bolt text-neon ml-2"></i>أحدث المباريات</h3>
+                    </div>
+                    <div class="divide-y divide-white/5">
+                        <div class="p-8 text-center text-gray-500 text-sm font-bold">سيتم عرض نتائج المباريات هنا...</div>
+                    </div>
+                </div>
             </div>
 
-            <div x-show="currentPage !== 'dashboard' && !isLoading" x-transition.opacity>
-                <div class="glass-card p-12 text-center">
-                    <div class="w-20 h-20 mx-auto bg-electric/10 text-electric rounded-full flex items-center justify-center text-3xl mb-4">
-                        <i class="fa-solid fa-hammer"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-white mb-2">قيد التطوير</h2>
-                    <p class="text-gray-400">هذه الوحدة (<span x-text="getPageTitle()" class="text-neon"></span>) سيتم بناؤها في المرحلة القادمة.</p>
+            <div x-show="currentPage === 'tournaments'" x-transition.opacity class="space-y-4">
+                
+                <div class="hidden md:flex justify-end mb-4">
+                    <button @click="openTournamentModal()" class="bg-electric hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-bold shadow-[0_0_15px_rgba(29,161,242,0.4)] flex items-center gap-2 transition-all active:scale-95">
+                        <i class="fa-solid fa-plus"></i> بطولة جديدة
+                    </button>
                 </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <template x-for="tourney in tournaments" :key="tourney.ID">
+                        <div class="glass-card p-5 relative overflow-hidden group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-800 to-navy flex items-center justify-center border border-white/10">
+                                        <i class="fa-solid fa-trophy text-xl" :class="tourney.Status === 'نشط' ? 'text-neon' : 'text-gray-500'"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-black text-white text-lg" x-text="tourney.Name"></h4>
+                                        <span class="text-xs font-bold px-2 py-0.5 rounded-md" :class="tourney.Type === 'دوري' ? 'bg-electric/20 text-electric' : 'bg-purple-500/20 text-purple-400'" x-text="tourney.Type"></span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-electric/20 text-gray-400 hover:text-electric flex items-center justify-center transition-colors"><i class="fa-solid fa-pen text-xs"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
+                                <div class="text-center">
+                                    <span class="block text-xs text-gray-500 font-bold mb-1">الفرق</span>
+                                    <span class="font-num font-black text-white" x-text="tourney.TeamsCount"></span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="block text-xs text-gray-500 font-bold mb-1">الحالة</span>
+                                    <span class="font-bold text-xs" :class="tourney.Status === 'نشط' ? 'text-neon' : 'text-red-400'" x-text="tourney.Status"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <template x-if="tournaments.length === 0 && !isLoading">
+                        <div class="col-span-full glass-card p-12 text-center border-dashed border-2 border-white/10">
+                            <i class="fa-solid fa-trophy text-4xl text-gray-600 mb-4 block"></i>
+                            <h3 class="text-white font-bold text-lg">لا توجد بطولات</h3>
+                            <p class="text-gray-500 text-sm mt-1">اضغط على زر الإضافة للبدء</p>
+                        </div>
+                    </template>
+                </div>
+
+                <button @click="openTournamentModal()" class="md:hidden fixed bottom-6 left-6 w-14 h-14 bg-electric rounded-full shadow-[0_0_20px_rgba(29,161,242,0.5)] flex items-center justify-center text-white text-2xl z-40 active:scale-90 transition-transform">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+
+            <div x-show="!['dashboard', 'tournaments'].includes(currentPage)" x-transition.opacity class="flex flex-col items-center justify-center h-full text-center p-8">
+                <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center text-4xl text-electric mb-6 border border-white/10">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <h2 class="text-2xl font-black text-white mb-2">تحت التطوير</h2>
+                <p class="text-gray-400 text-sm">شاشة (<span x-text="getPageTitle()" class="text-neon mx-1"></span>) سيتم بناؤها في المرحلة القادمة لتطابق هذا التصميم.</p>
             </div>
 
         </div>
     </main>
 
+    <div x-show="isModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
+        <div x-show="isModalOpen" x-transition.opacity class="absolute inset-0 bg-black/80 backdrop-blur-md" @click="isModalOpen = false"></div>
+        
+        <div x-show="isModalOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative glass-panel rounded-2xl w-full max-w-md p-6 border border-white/20 shadow-2xl mt-auto sm:mt-0 mb-0 sm:mb-0 max-h-[90vh] overflow-y-auto">
+            
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-white">بطولة جديدة</h3>
+                <button @click="isModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form @submit.prevent="saveTournament()" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">اسم البطولة</label>
+                    <input type="text" x-model="form.Name" required class="custom-input" placeholder="مثال: دوري الأبطال">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 mb-1.5">نظام البطولة</label>
+                        <select x-model="form.Type" class="custom-input appearance-none">
+                            <option value="دوري">دوري نقاط</option>
+                            <option value="خروج المغلوب">خروج المغلوب</option>
+                            <option value="مجموعات">مجموعات</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 mb-1.5">عدد الفرق</label>
+                        <input type="number" x-model="form.TeamsCount" required class="custom-input font-num" placeholder="16">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">الحالة</label>
+                    <select x-model="form.Status" class="custom-input appearance-none">
+                        <option value="تحضير">قيد التحضير</option>
+                        <option value="نشط">نشط (جارية)</option>
+                    </option>
+                </div>
+
+                <div class="pt-4 mt-6 border-t border-white/10 flex gap-3">
+                    <button type="submit" class="flex-1 bg-electric hover:bg-blue-500 text-white py-3 rounded-xl font-bold shadow-lg transition-colors flex justify-center items-center gap-2">
+                        <span x-show="!isSaving"><i class="fa-solid fa-check"></i> حفظ البطولة</span>
+                        <span x-show="isSaving"><i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('appData', () => ({
+            Alpine.data('tourneyApp', () => ({
+                // States
                 isLoading: true,
-                isAdmin: false,
+                isSaving: false,
+                isMobileMenuOpen: false,
+                isModalOpen: false,
                 currentPage: 'dashboard',
+                
+                // Data
+                stats: { tournamentsCount: 0, teamsCount: 0, playersCount: 0, upcomingMatches: 0 },
+                tournaments: [],
+                
+                // Form
+                form: { Name: '', Type: 'دوري', TeamsCount: '', Status: 'تحضير' },
+
+                // Menu Config
                 menu: [
-                    { id: 'dashboard', name: 'الرئيسية', icon: 'fa-solid fa-chart-pie' },
-                    { id: 'tournaments', name: 'إدارة البطولات', icon: 'fa-solid fa-trophy' },
+                    { id: 'dashboard', name: 'لوحة القيادة', icon: 'fa-solid fa-chart-pie' },
+                    { id: 'tournaments', name: 'البطولات', icon: 'fa-solid fa-trophy' },
                     { id: 'teams', name: 'الفرق', icon: 'fa-solid fa-shield-halved' },
                     { id: 'players', name: 'اللاعبين', icon: 'fa-solid fa-users' },
                     { id: 'matches', name: 'المباريات', icon: 'fa-solid fa-futbol' },
-                    { id: 'standings', name: 'جدول الترتيب', icon: 'fa-solid fa-list-ol' },
-                    { id: 'stats', name: 'الإحصائيات', icon: 'fa-solid fa-chart-column' },
-                    { id: 'payments', name: 'الاشتراكات والأقساط', icon: 'fa-solid fa-wallet' },
+                    { id: 'standings', name: 'الترتيب', icon: 'fa-solid fa-list-ol' },
                     { id: 'settings', name: 'الإعدادات', icon: 'fa-solid fa-gear' }
                 ],
-                stats: { tournamentsCount: 0, teamsCount: 0, playersCount: 0, upcomingMatches: 0 },
-                latestMatches: [],
 
-                initApp() {
-                    // استدعاء البيانات من Google Apps Script
-                    google.script.run
-                        .withSuccessHandler((response) => {
-                            if(response.success) {
-                                this.stats = response.stats;
-                                this.latestMatches = response.latestMatches;
-                                this.isAdmin = response.isAdmin;
-                            }
-                            this.isLoading = false;
-                        })
-                        .withFailureHandler((error) => {
-                            console.error("Error fetching data:", error);
-                            this.isLoading = false;
-                        })
-                        .getDashboardStats();
+                init() {
+                    // Fetch initial data (Mocked for dev preview, replace with GAS call)
+                    this.fetchDashboardData();
+                },
+
+                changePage(pageId) {
+                    this.currentPage = pageId;
+                    this.isMobileMenuOpen = false; // Auto-close sidebar on mobile
+                    
+                    if(pageId === 'tournaments' && this.tournaments.length === 0) {
+                        this.fetchTournaments();
+                    }
                 },
 
                 getPageTitle() {
-                    const page = this.menu.find(p => p.id === this.currentPage);
-                    return page ? page.name : '';
+                    return this.menu.find(p => p.id === this.currentPage)?.name || '';
+                },
+
+                openTournamentModal() {
+                    this.form = { Name: '', Type: 'دوري', TeamsCount: '', Status: 'تحضير' };
+                    this.isModalOpen = true;
+                },
+
+                // --- API Calls (Google Apps Script) ---
+                
+                fetchDashboardData() {
+                    this.isLoading = true;
+                    google.script.run
+                        .withSuccessHandler((res) => {
+                            if(res.success) this.stats = res.stats;
+                            this.isLoading = false;
+                        })
+                        .withFailureHandler(() => this.isLoading = false)
+                        .apiRequest('getDashboard');
+                },
+
+                fetchTournaments() {
+                    this.isLoading = true;
+                    google.script.run
+                        .withSuccessHandler((res) => {
+                            if(res.success) this.tournaments = res.data;
+                            this.isLoading = false;
+                        })
+                        .withFailureHandler(() => this.isLoading = false)
+                        .apiRequest('read', 'Tournaments');
+                },
+
+                saveTournament() {
+                    this.isSaving = true;
+                    google.script.run
+                        .withSuccessHandler((res) => {
+                            if(res.success) {
+                                this.tournaments.unshift(res.data); // Add to UI
+                                this.isModalOpen = false;
+                                this.stats.tournamentsCount++; // Update stats visually
+                            }
+                            this.isSaving = false;
+                        })
+                        .withFailureHandler(() => {
+                            alert('حدث خطأ أثناء الحفظ');
+                            this.isSaving = false;
+                        })
+                        .apiRequest('create', 'Tournaments', this.form);
                 }
             }));
         });
