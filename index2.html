@@ -4,24 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0B1D3A">
-    <title>نظام إدارة البطولات</title>
+    <title>برو ليج - نظام إدارة البطولات</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Inter:wght@600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Inter:wght@600;800;900&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Tajawal', 'sans-serif'], num: ['Inter', 'sans-serif'] },
-                    colors: {
-                        navy: '#0B1D3A',       // Primary
-                        neon: '#00FF9C',       // Secondary
-                        electric: '#1DA1F2',   // Accent
-                        dark: '#050b14'
-                    }
+                    colors: { navy: '#0B1D3A', neon: '#00FF9C', electric: '#1DA1F2', dark: '#050b14' }
                 }
             }
         }
@@ -29,301 +24,257 @@
 
     <style>
         body { 
-            background-color: #050b14; 
-            color: #ffffff; 
-            background-image: radial-gradient(circle at top right, rgba(29, 161, 242, 0.15), transparent 40%), 
-                              radial-gradient(circle at bottom left, rgba(0, 255, 156, 0.1), transparent 40%); 
-            background-attachment: fixed; 
-            -webkit-tap-highlight-color: transparent;
+            background-color: #050b14; color: #ffffff; 
+            background-image: radial-gradient(circle at top right, rgba(29, 161, 242, 0.15), transparent 40%), radial-gradient(circle at bottom left, rgba(0, 255, 156, 0.1), transparent 40%); 
+            background-attachment: fixed; -webkit-tap-highlight-color: transparent;
         }
-        
-        /* Glassmorphism Styles */
-        .glass-panel {
-            background: rgba(11, 29, 58, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 1rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+        .glass-panel { background: rgba(11, 29, 58, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s; }
+        .glass-card:hover { border-color: rgba(29, 161, 242, 0.3); }
         .glass-card:active { transform: scale(0.98); }
-
-        /* Custom Input */
-        .custom-input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: 0.75rem;
-            padding: 0.75rem 1rem;
-            outline: none;
-            transition: all 0.3s;
-        }
-        .custom-input:focus {
-            border-color: #1DA1F2;
-            box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
-            background: rgba(0, 0, 0, 0.4);
-        }
-
-        /* Hide scrollbar for clean mobile look */
+        
+        .custom-input { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 0.75rem; padding: 0.75rem 1rem; outline: none; transition: all 0.3s; }
+        .custom-input:focus { border-color: #1DA1F2; box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2); background: rgba(0, 0, 0, 0.4); }
         ::-webkit-scrollbar { display: none; }
+
+        /* Smooth Image Load */
+        img { transition: opacity 0.3s ease-in-out; }
     </style>
 </head>
-<body x-data="tourneyApp()" x-init="init()" class="antialiased overflow-hidden flex h-screen">
+<body x-data="erpApp()" x-init="init()" class="antialiased overflow-hidden flex h-screen">
 
-    <div x-show="isMobileMenuOpen" 
-         x-transition:enter="transition-opacity ease-linear duration-300"
-         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-300"
-         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-         @click="isMobileMenuOpen = false"></div>
+    <div x-show="isMobileMenuOpen" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" @click="isMobileMenuOpen = false"></div>
 
-    <aside :class="isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'"
-           class="fixed lg:static inset-y-0 right-0 z-50 w-72 glass-panel flex flex-col transition-transform duration-300 ease-in-out border-l border-white/10 lg:m-4 lg:rounded-2xl lg:border lg:h-[calc(100vh-2rem)] shrink-0">
-        
+    <aside :class="isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'" class="fixed lg:static inset-y-0 right-0 z-50 w-72 glass-panel flex flex-col transition-transform duration-300 ease-in-out border-l border-white/10 lg:m-4 lg:rounded-2xl lg:border lg:h-[calc(100vh-2rem)] shrink-0">
         <div class="p-6 flex items-center justify-between border-b border-white/10">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-neon to-electric flex items-center justify-center shadow-[0_0_15px_rgba(0,255,156,0.3)]">
-                    <i class="fa-solid fa-trophy text-navy text-xl"></i>
+                    <i class="fa-solid fa-bolt text-navy text-xl"></i>
                 </div>
                 <h1 class="font-black text-2xl tracking-wide text-white">برو<span class="text-neon">ليج</span></h1>
             </div>
-            <button @click="isMobileMenuOpen = false" class="lg:hidden text-gray-400 hover:text-white text-xl">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <template x-for="item in menu" :key="item.id">
-                <button @click="changePage(item.id)" 
-                        :class="currentPage === item.id ? 'bg-electric/10 text-electric border-r-4 border-electric' : 'text-gray-400 hover:bg-white/5 hover:text-white border-r-4 border-transparent'"
-                        class="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all duration-200 font-bold text-right text-sm md:text-base">
+                <button @click="changePage(item.id)" :class="currentPage === item.id ? 'bg-electric/10 text-electric border-r-4 border-electric' : 'text-gray-400 hover:bg-white/5 hover:text-white border-r-4 border-transparent'" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all duration-200 font-bold text-right text-sm md:text-base">
                     <i :class="item.icon" class="w-6 text-center text-lg"></i>
                     <span x-text="item.name"></span>
                 </button>
             </template>
         </nav>
-
-        <div class="p-4 border-t border-white/10 mt-auto">
-            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                <div class="w-10 h-10 rounded-full bg-navy border-2 border-electric flex items-center justify-center text-electric">
-                    <i class="fa-solid fa-user-shield"></i>
-                </div>
-                <div class="flex-1 overflow-hidden">
-                    <div class="text-sm font-bold text-white truncate">إدارة النظام</div>
-                    <div class="text-[10px] text-neon flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-neon animate-pulse"></span> متصل</div>
-                </div>
-            </div>
-        </div>
     </aside>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative z-10 w-full">
-        
         <header class="glass-panel h-16 md:h-20 px-4 md:px-8 flex items-center justify-between shrink-0 border-b border-white/10 lg:m-4 lg:mb-0 lg:rounded-2xl lg:border">
             <div class="flex items-center gap-4">
-                <button @click="isMobileMenuOpen = true" class="lg:hidden w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-white hover:bg-white/10 active:scale-95 transition-all">
-                    <i class="fa-solid fa-bars-staggered"></i>
-                </button>
+                <button @click="isMobileMenuOpen = true" class="lg:hidden w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-bars-staggered"></i></button>
                 <h2 class="text-lg md:text-2xl font-black text-white tracking-wide" x-text="getPageTitle()"></h2>
-            </div>
-            <div class="flex items-center gap-3">
-                <button class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-300 relative">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-neon rounded-full shadow-[0_0_8px_#00FF9C]"></span>
-                </button>
             </div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:px-8 pb-24 lg:pb-8 relative">
             
             <div x-show="isLoading" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050b14]/80 backdrop-blur-sm">
-                <i class="fa-solid fa-circle-notch fa-spin text-5xl text-electric drop-shadow-[0_0_15px_#1DA1F2]"></i>
-                <p class="mt-4 text-white font-bold tracking-widest animate-pulse">جاري التحميل...</p>
+                <i class="fa-solid fa-circle-notch fa-spin text-5xl text-neon drop-shadow-[0_0_15px_#00FF9C]"></i>
             </div>
 
             <div x-show="currentPage === 'dashboard'" x-transition.opacity class="space-y-6">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                    <div class="glass-card p-4 md:p-6 relative overflow-hidden flex flex-col justify-between">
-                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-neon/10 rounded-full blur-2xl"></div>
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-neon/10 text-neon flex items-center justify-center text-sm md:text-xl">
-                                <i class="fa-solid fa-trophy"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl md:text-4xl font-black font-num text-white" x-text="stats.tournamentsCount">0</h3>
-                            <p class="text-gray-400 text-xs md:text-sm font-bold mt-1">البطولات</p>
-                        </div>
-                    </div>
-                    <div class="glass-card p-4 md:p-6 relative overflow-hidden flex flex-col justify-between">
-                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-electric/10 rounded-full blur-2xl"></div>
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-electric/10 text-electric flex items-center justify-center text-sm md:text-xl">
-                                <i class="fa-solid fa-shield-halved"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl md:text-4xl font-black font-num text-white" x-text="stats.teamsCount">0</h3>
-                            <p class="text-gray-400 text-xs md:text-sm font-bold mt-1">الفرق</p>
-                        </div>
-                    </div>
-                    <div class="glass-card p-4 md:p-6 relative overflow-hidden flex flex-col justify-between">
-                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm md:text-xl">
-                                <i class="fa-solid fa-users"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl md:text-4xl font-black font-num text-white" x-text="stats.playersCount">0</h3>
-                            <p class="text-gray-400 text-xs md:text-sm font-bold mt-1">اللاعبين</p>
-                        </div>
-                    </div>
-                    <div class="glass-card p-4 md:p-6 relative overflow-hidden flex flex-col justify-between">
-                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-red-500/10 rounded-full blur-2xl"></div>
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center text-sm md:text-xl">
-                                <i class="fa-solid fa-stopwatch"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl md:text-4xl font-black font-num text-white" x-text="stats.upcomingMatches">0</h3>
-                            <p class="text-gray-400 text-xs md:text-sm font-bold mt-1">مباريات قادمة</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel rounded-2xl overflow-hidden mt-6">
-                    <div class="p-4 md:p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
-                        <h3 class="font-bold text-white text-sm md:text-base"><i class="fa-solid fa-bolt text-neon ml-2"></i>أحدث المباريات</h3>
-                    </div>
-                    <div class="divide-y divide-white/5">
-                        <div class="p-8 text-center text-gray-500 text-sm font-bold">سيتم عرض نتائج المباريات هنا...</div>
-                    </div>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-card p-6 flex flex-col items-center justify-center text-center"><i class="fa-solid fa-trophy text-3xl text-electric mb-2"></i><h3 class="text-3xl font-black text-white">4</h3><p class="text-gray-400 text-sm">بطولات</p></div>
+                    <div class="glass-card p-6 flex flex-col items-center justify-center text-center"><i class="fa-solid fa-shield-halved text-3xl text-neon mb-2"></i><h3 class="text-3xl font-black text-white">16</h3><p class="text-gray-400 text-sm">فرق</p></div>
                 </div>
             </div>
 
-            <div x-show="currentPage === 'tournaments'" x-transition.opacity class="space-y-4">
+            <div x-show="currentPage === 'teams'" x-transition.opacity class="space-y-6">
                 
-                <div class="hidden md:flex justify-end mb-4">
-                    <button @click="openTournamentModal()" class="bg-electric hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-bold shadow-[0_0_15px_rgba(29,161,242,0.4)] flex items-center gap-2 transition-all active:scale-95">
-                        <i class="fa-solid fa-plus"></i> بطولة جديدة
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="relative w-full md:w-80">
+                        <input type="text" x-model="searchQueries.teams" placeholder="ابحث عن فريق..." class="custom-input pr-10">
+                        <i class="fa-solid fa-search absolute right-4 top-3.5 text-gray-400"></i>
+                    </div>
+                    <button @click="openModal('team')" class="hidden md:flex w-full md:w-auto justify-center bg-electric text-white hover:bg-blue-500 px-6 py-3 rounded-xl font-bold shadow-[0_0_15px_rgba(29,161,242,0.4)] items-center gap-2 transition-all">
+                        <i class="fa-solid fa-plus"></i> إضافة فريق
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <template x-for="tourney in tournaments" :key="tourney.ID">
-                        <div class="glass-card p-5 relative overflow-hidden group">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-800 to-navy flex items-center justify-center border border-white/10">
-                                        <i class="fa-solid fa-trophy text-xl" :class="tourney.Status === 'نشط' ? 'text-neon' : 'text-gray-500'"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-black text-white text-lg" x-text="tourney.Name"></h4>
-                                        <span class="text-xs font-bold px-2 py-0.5 rounded-md" :class="tourney.Type === 'دوري' ? 'bg-electric/20 text-electric' : 'bg-purple-500/20 text-purple-400'" x-text="tourney.Type"></span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-electric/20 text-gray-400 hover:text-electric flex items-center justify-center transition-colors"><i class="fa-solid fa-pen text-xs"></i></button>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <template x-for="team in filteredTeams" :key="team.ID">
+                        <div class="glass-card p-5 group relative overflow-hidden flex flex-col items-center text-center">
+                            <div class="relative w-24 h-24 mb-4">
+                                <div class="absolute inset-0 bg-electric/20 rounded-full blur-xl group-hover:bg-electric/40 transition-all"></div>
+                                <div class="relative w-full h-full rounded-full bg-navy border-2 border-electric flex items-center justify-center overflow-hidden">
+                                    <template x-if="team.LogoURL"><img :src="team.LogoURL" class="w-full h-full object-cover"></template>
+                                    <template x-if="!team.LogoURL"><i class="fa-solid fa-shield text-3xl text-electric"></i></template>
                                 </div>
                             </div>
                             
-                            <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
-                                <div class="text-center">
-                                    <span class="block text-xs text-gray-500 font-bold mb-1">الفرق</span>
-                                    <span class="font-num font-black text-white" x-text="tourney.TeamsCount"></span>
+                            <h3 class="text-xl font-black text-white mb-1" x-text="team.Name"></h3>
+                            <p class="text-sm font-bold text-gray-400 mb-4"><i class="fa-solid fa-user-tie text-xs ml-1"></i> <span x-text="team.Coach"></span></p>
+                            
+                            <div class="w-full grid grid-cols-2 gap-2 border-t border-white/10 pt-4 mt-auto">
+                                <div class="bg-white/5 rounded-lg p-2">
+                                    <span class="block text-xs text-gray-500">اللاعبين</span>
+                                    <span class="font-num font-black text-white text-lg">22</span>
                                 </div>
-                                <div class="text-center">
-                                    <span class="block text-xs text-gray-500 font-bold mb-1">الحالة</span>
-                                    <span class="font-bold text-xs" :class="tourney.Status === 'نشط' ? 'text-neon' : 'text-red-400'" x-text="tourney.Status"></span>
+                                <div class="bg-white/5 rounded-lg p-2">
+                                    <span class="block text-xs text-gray-500">البطولات</span>
+                                    <span class="font-num font-black text-white text-lg">2</span>
                                 </div>
+                            </div>
+
+                            <div class="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                <button class="w-8 h-8 rounded-full bg-white/10 hover:bg-electric text-white flex items-center justify-center backdrop-blur-md"><i class="fa-solid fa-pen text-xs"></i></button>
                             </div>
                         </div>
                     </template>
-                    
-                    <template x-if="tournaments.length === 0 && !isLoading">
-                        <div class="col-span-full glass-card p-12 text-center border-dashed border-2 border-white/10">
-                            <i class="fa-solid fa-trophy text-4xl text-gray-600 mb-4 block"></i>
-                            <h3 class="text-white font-bold text-lg">لا توجد بطولات</h3>
-                            <p class="text-gray-500 text-sm mt-1">اضغط على زر الإضافة للبدء</p>
-                        </div>
-                    </template>
+                </div>
+                
+                <div x-show="filteredTeams.length === 0 && !isLoading" class="glass-card p-12 text-center w-full">
+                    <i class="fa-solid fa-shield-halved text-5xl text-gray-600 mb-4 block"></i>
+                    <h3 class="text-white font-bold text-xl">لا توجد فرق مسجلة</h3>
                 </div>
 
-                <button @click="openTournamentModal()" class="md:hidden fixed bottom-6 left-6 w-14 h-14 bg-electric rounded-full shadow-[0_0_20px_rgba(29,161,242,0.5)] flex items-center justify-center text-white text-2xl z-40 active:scale-90 transition-transform">
+                <button @click="openModal('team')" class="md:hidden fixed bottom-6 left-6 w-14 h-14 bg-electric rounded-full shadow-[0_0_20px_rgba(29,161,242,0.5)] flex items-center justify-center text-white text-2xl z-40 active:scale-90">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
 
-            <div x-show="!['dashboard', 'tournaments'].includes(currentPage)" x-transition.opacity class="flex flex-col items-center justify-center h-full text-center p-8">
-                <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center text-4xl text-electric mb-6 border border-white/10">
-                    <i class="fa-solid fa-code"></i>
+            <div x-show="currentPage === 'players'" x-transition.opacity class="space-y-6">
+                
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex w-full md:w-auto gap-2">
+                        <div class="relative flex-1 md:w-64">
+                            <input type="text" x-model="searchQueries.players" placeholder="اسم اللاعب..." class="custom-input pr-10">
+                            <i class="fa-solid fa-search absolute right-4 top-3.5 text-gray-400"></i>
+                        </div>
+                        <select x-model="filters.playerTeam" class="custom-input w-1/3 appearance-none font-bold">
+                            <option value="">كل الفرق</option>
+                            <template x-for="team in teams" :key="team.ID">
+                                <option :value="team.ID" x-text="team.Name"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <button @click="openModal('player')" class="hidden md:flex w-full md:w-auto justify-center bg-neon text-navy hover:bg-green-400 px-6 py-3 rounded-xl font-black shadow-[0_0_15px_rgba(0,255,156,0.4)] items-center gap-2 transition-all">
+                        <i class="fa-solid fa-user-plus"></i> إضافة لاعب
+                    </button>
                 </div>
-                <h2 class="text-2xl font-black text-white mb-2">تحت التطوير</h2>
-                <p class="text-gray-400 text-sm">شاشة (<span x-text="getPageTitle()" class="text-neon mx-1"></span>) سيتم بناؤها في المرحلة القادمة لتطابق هذا التصميم.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <template x-for="player in filteredPlayers" :key="player.ID">
+                        <div class="glass-card p-4 flex items-center gap-4 group">
+                            <div class="relative w-16 h-16 rounded-xl bg-navy border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                                <i class="fa-solid fa-user text-2xl text-gray-500"></i>
+                            </div>
+                            
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-black text-white text-lg truncate" x-text="player.Name"></h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white/10 text-gray-300" x-text="player.Position"></span>
+                                    <span class="text-[10px] font-bold text-electric flex items-center gap-1"><i class="fa-solid fa-shield text-[8px]"></i> <span x-text="getTeamName(player.TeamID)"></span></span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-end gap-2">
+                                <div class="text-neon text-xs"><i class="fa-solid fa-star"></i> 8.5</div>
+                                <span class="text-xs font-num text-gray-500" x-text="player.Age + ' سنة'"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="filteredPlayers.length === 0 && !isLoading" class="glass-card p-12 text-center w-full">
+                    <i class="fa-solid fa-users-slash text-5xl text-gray-600 mb-4 block"></i>
+                    <h3 class="text-white font-bold text-xl">لا يوجد لاعبين</h3>
+                </div>
+
+                <button @click="openModal('player')" class="md:hidden fixed bottom-6 left-6 w-14 h-14 bg-neon rounded-full shadow-[0_0_20px_rgba(0,255,156,0.5)] flex items-center justify-center text-navy text-2xl z-40 active:scale-90">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
             </div>
 
         </div>
     </main>
 
-    <div x-show="isModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-        <div x-show="isModalOpen" x-transition.opacity class="absolute inset-0 bg-black/80 backdrop-blur-md" @click="isModalOpen = false"></div>
-        
-        <div x-show="isModalOpen" 
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
-             class="relative glass-panel rounded-2xl w-full max-w-md p-6 border border-white/20 shadow-2xl mt-auto sm:mt-0 mb-0 sm:mb-0 max-h-[90vh] overflow-y-auto">
-            
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-white">بطولة جديدة</h3>
-                <button @click="isModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <form @submit.prevent="saveTournament()" class="space-y-4">
+    <div x-show="modals.team" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" @click="modals.team = false"></div>
+        <div x-show="modals.team" x-transition.scale.origin.bottom class="relative glass-panel rounded-2xl w-full max-w-md p-6 border border-white/20 shadow-2xl">
+            <h3 class="text-xl font-black text-white mb-6">فريق جديد</h3>
+            <form @submit.prevent="saveData('team')" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1.5">اسم البطولة</label>
-                    <input type="text" x-model="form.Name" required class="custom-input" placeholder="مثال: دوري الأبطال">
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">اسم الفريق</label>
+                    <input type="text" x-model="forms.team.Name" required class="custom-input" placeholder="مثال: ريال مدريد">
                 </div>
-                
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">اسم المدرب</label>
+                    <input type="text" x-model="forms.team.Coach" required class="custom-input" placeholder="اسم المدير الفني">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">شعار الفريق</label>
+                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-white/10 border-dashed rounded-xl cursor-pointer hover:bg-white/5 hover:border-electric transition-colors">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <template x-if="!forms.team.LogoURL">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-400 font-bold">اضغط لرفع الشعار</p>
+                                </div>
+                            </template>
+                            <template x-if="forms.team.LogoURL">
+                                <img :src="forms.team.LogoURL" class="h-24 object-contain">
+                            </template>
+                        </div>
+                        <input type="file" class="hidden" accept="image/*" @change="handleFileUpload($event, 'team')">
+                    </label>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" @click="modals.team = false" class="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-bold">إلغاء</button>
+                    <button type="submit" class="flex-1 bg-electric hover:bg-blue-500 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
+                        <span x-show="!isSaving">حفظ</span>
+                        <i x-show="isSaving" class="fa-solid fa-circle-notch fa-spin"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div x-show="modals.player" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" @click="modals.player = false"></div>
+        <div x-show="modals.player" x-transition.scale.origin.bottom class="relative glass-panel rounded-2xl w-full max-w-md p-6 border border-white/20 shadow-2xl">
+            <h3 class="text-xl font-black text-white mb-6 flex items-center gap-2"><i class="fa-solid fa-user-plus text-neon"></i> لاعب جديد</h3>
+            <form @submit.prevent="saveData('player')" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">اسم اللاعب</label>
+                    <input type="text" x-model="forms.player.Name" required class="custom-input" placeholder="مثال: كريستيانو رونالدو">
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 mb-1.5">نظام البطولة</label>
-                        <select x-model="form.Type" class="custom-input appearance-none">
-                            <option value="دوري">دوري نقاط</option>
-                            <option value="خروج المغلوب">خروج المغلوب</option>
-                            <option value="مجموعات">مجموعات</option>
-                        </select>
+                        <label class="block text-xs font-bold text-gray-400 mb-1.5">العمر</label>
+                        <input type="number" x-model="forms.player.Age" required class="custom-input font-num" placeholder="25">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 mb-1.5">عدد الفرق</label>
-                        <input type="number" x-model="form.TeamsCount" required class="custom-input font-num" placeholder="16">
+                        <label class="block text-xs font-bold text-gray-400 mb-1.5">المركز</label>
+                        <select x-model="forms.player.Position" required class="custom-input appearance-none">
+                            <option value="حارس مرمى">حارس مرمى</option>
+                            <option value="مدافع">مدافع</option>
+                            <option value="خط وسط">خط وسط</option>
+                            <option value="مهاجم">مهاجم</option>
+                        </select>
                     </div>
                 </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1.5">الحالة</label>
-                    <select x-model="form.Status" class="custom-input appearance-none">
-                        <option value="تحضير">قيد التحضير</option>
-                        <option value="نشط">نشط (جارية)</option>
-                    </option>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">الفريق</label>
+                    <select x-model="forms.player.TeamID" required class="custom-input appearance-none font-bold">
+                        <option value="" disabled selected>اختر الفريق...</option>
+                        <template x-for="team in teams" :key="team.ID">
+                            <option :value="team.ID" x-text="team.Name"></option>
+                        </template>
+                    </select>
                 </div>
-
-                <div class="pt-4 mt-6 border-t border-white/10 flex gap-3">
-                    <button type="submit" class="flex-1 bg-electric hover:bg-blue-500 text-white py-3 rounded-xl font-bold shadow-lg transition-colors flex justify-center items-center gap-2">
-                        <span x-show="!isSaving"><i class="fa-solid fa-check"></i> حفظ البطولة</span>
-                        <span x-show="isSaving"><i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...</span>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" @click="modals.player = false" class="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-bold">إلغاء</button>
+                    <button type="submit" class="flex-1 bg-neon text-navy hover:bg-green-400 py-3 rounded-xl font-black flex justify-center items-center gap-2">
+                        <span x-show="!isSaving">حفظ اللاعب</span>
+                        <i x-show="isSaving" class="fa-solid fa-circle-notch fa-spin"></i>
                     </button>
                 </div>
             </form>
@@ -332,95 +283,92 @@
 
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('tourneyApp', () => ({
-                // States
-                isLoading: true,
-                isSaving: false,
-                isMobileMenuOpen: false,
-                isModalOpen: false,
-                currentPage: 'dashboard',
+            Alpine.data('erpApp', () => ({
+                isLoading: false, isSaving: false, isMobileMenuOpen: false,
+                currentPage: 'teams', // Start here for testing
                 
-                // Data
-                stats: { tournamentsCount: 0, teamsCount: 0, playersCount: 0, upcomingMatches: 0 },
-                tournaments: [],
-                
-                // Form
-                form: { Name: '', Type: 'دوري', TeamsCount: '', Status: 'تحضير' },
-
-                // Menu Config
                 menu: [
                     { id: 'dashboard', name: 'لوحة القيادة', icon: 'fa-solid fa-chart-pie' },
                     { id: 'tournaments', name: 'البطولات', icon: 'fa-solid fa-trophy' },
                     { id: 'teams', name: 'الفرق', icon: 'fa-solid fa-shield-halved' },
                     { id: 'players', name: 'اللاعبين', icon: 'fa-solid fa-users' },
-                    { id: 'matches', name: 'المباريات', icon: 'fa-solid fa-futbol' },
-                    { id: 'standings', name: 'الترتيب', icon: 'fa-solid fa-list-ol' },
-                    { id: 'settings', name: 'الإعدادات', icon: 'fa-solid fa-gear' }
+                    { id: 'matches', name: 'المباريات', icon: 'fa-solid fa-futbol' }
                 ],
 
-                init() {
-                    // Fetch initial data (Mocked for dev preview, replace with GAS call)
-                    this.fetchDashboardData();
+                // Data Arrays
+                teams: [],
+                players: [],
+
+                // UI State
+                searchQueries: { teams: '', players: '' },
+                filters: { playerTeam: '' },
+                modals: { team: false, player: false },
+                forms: {
+                    team: { Name: '', Coach: '', LogoURL: '' },
+                    player: { Name: '', Age: '', Position: 'مهاجم', TeamID: '' }
                 },
 
+                init() {
+                    // Mock Data for UI Testing (سيتم ربطها بـ GAS لاحقاً)
+                    this.teams = [
+                        { ID: 'T1', Name: 'النادي الأهلي', Coach: 'مارسيل كولر', LogoURL: '' },
+                        { ID: 'T2', Name: 'نادي الزمالك', Coach: 'جوزيه جوميز', LogoURL: '' }
+                    ];
+                    this.players = [
+                        { ID: 'P1', Name: 'محمد الشناوي', Age: 35, Position: 'حارس مرمى', TeamID: 'T1' },
+                        { ID: 'P2', Name: 'أحمد سيد زيزو', Age: 28, Position: 'جناح أيمن', TeamID: 'T2' }
+                    ];
+                },
+
+                // Computed / Getters
+                get filteredTeams() {
+                    if (this.searchQueries.teams === '') return this.teams;
+                    return this.teams.filter(t => t.Name.includes(this.searchQueries.teams));
+                },
+                get filteredPlayers() {
+                    return this.players.filter(p => {
+                        const matchName = p.Name.includes(this.searchQueries.players);
+                        const matchTeam = this.filters.playerTeam === '' || p.TeamID === this.filters.playerTeam;
+                        return matchName && matchTeam;
+                    });
+                },
+                getTeamName(id) {
+                    const team = this.teams.find(t => t.ID === id);
+                    return team ? team.Name : 'غير محدد';
+                },
+                getPageTitle() { return this.menu.find(p => p.id === this.currentPage)?.name || ''; },
+
+                // Actions
                 changePage(pageId) {
                     this.currentPage = pageId;
-                    this.isMobileMenuOpen = false; // Auto-close sidebar on mobile
-                    
-                    if(pageId === 'tournaments' && this.tournaments.length === 0) {
-                        this.fetchTournaments();
-                    }
+                    this.isMobileMenuOpen = false;
                 },
-
-                getPageTitle() {
-                    return this.menu.find(p => p.id === this.currentPage)?.name || '';
+                openModal(type) {
+                    if(type === 'team') this.forms.team = { Name: '', Coach: '', LogoURL: '' };
+                    if(type === 'player') this.forms.player = { Name: '', Age: '', Position: 'مهاجم', TeamID: '' };
+                    this.modals[type] = true;
                 },
-
-                openTournamentModal() {
-                    this.form = { Name: '', Type: 'دوري', TeamsCount: '', Status: 'تحضير' };
-                    this.isModalOpen = true;
-                },
-
-                // --- API Calls (Google Apps Script) ---
                 
-                fetchDashboardData() {
-                    this.isLoading = true;
-                    google.script.run
-                        .withSuccessHandler((res) => {
-                            if(res.success) this.stats = res.stats;
-                            this.isLoading = false;
-                        })
-                        .withFailureHandler(() => this.isLoading = false)
-                        .apiRequest('getDashboard');
+                // Image to Base64 (For Team Logo)
+                handleFileUpload(event, formType) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => { this.forms[formType].LogoURL = e.target.result; };
+                    reader.readAsDataURL(file);
                 },
 
-                fetchTournaments() {
-                    this.isLoading = true;
-                    google.script.run
-                        .withSuccessHandler((res) => {
-                            if(res.success) this.tournaments = res.data;
-                            this.isLoading = false;
-                        })
-                        .withFailureHandler(() => this.isLoading = false)
-                        .apiRequest('read', 'Tournaments');
-                },
-
-                saveTournament() {
+                // Mock Save (Simulates GAS Call)
+                saveData(type) {
                     this.isSaving = true;
-                    google.script.run
-                        .withSuccessHandler((res) => {
-                            if(res.success) {
-                                this.tournaments.unshift(res.data); // Add to UI
-                                this.isModalOpen = false;
-                                this.stats.tournamentsCount++; // Update stats visually
-                            }
-                            this.isSaving = false;
-                        })
-                        .withFailureHandler(() => {
-                            alert('حدث خطأ أثناء الحفظ');
-                            this.isSaving = false;
-                        })
-                        .apiRequest('create', 'Tournaments', this.form);
+                    setTimeout(() => {
+                        const newData = { ...this.forms[type], ID: 'ID_' + Math.floor(Math.random() * 1000) };
+                        if (type === 'team') this.teams.push(newData);
+                        if (type === 'player') this.players.push(newData);
+                        
+                        this.modals[type] = false;
+                        this.isSaving = false;
+                    }, 800);
                 }
             }));
         });
